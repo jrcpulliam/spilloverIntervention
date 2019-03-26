@@ -1,0 +1,127 @@
+---
+title: Ecological interventions to prevent and manage pathogen spillover - Supplemental
+  Information
+author: "Sokolow, SH, N Nova, K Pepin, AJ Peel, K Manlove, PC Cross, DJ Becker, RK Plowright, JRC Pulliam, H McCallum, and GA De Leo"
+date: "March 25, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# devtools::install_github('kingaa/pomp') # Install pomp2 (will be pomp 2.1 on CRAN)
+library(pomp)
+library(readr)
+library(tidyverse)
+source('simFunctions.R')
+pars <- read_csv('parameters.csv')
+# Format Table S1
+tab1 <- pars %>% select(Parameter, Description, Name, Units, Example1, Example2) %>% mutate(Example1 = as.character(ifelse(Example1 < 0.01,signif(Example1,2),round(Example1,2))), Example2 = as.character(ifelse(Example2 < 0.01,signif(Example2,2),round(Example2,2))))
+# Format Table S2
+tab2 <- pars %>% filter(!is.na(Intervention)) %>% select(Intervention, Parameter, Description)
+```
+
+## Modelling methods
+
+We defined a simple 2-host system, i.e., donors and recipients, with three compartmental classes, Susceptible-Infected-Recovered (SIR), for each host species, and spillover from donors to recipients. Model simulations are conducted using an Euler-multinomial approximation to the two-host ordinary differential equation model [1]. Our model builds off frameworks previously proposed, e.g. [2, 3], but our focus is more on the practical implications of potential interventions. Using a tractable framework, we focus on the comparative outcomes of simulated management options applied to either donor or recipient populations, and highlight potential non-linearities in spillover risk that result.
+
+We use the model to simulate disease dynamics for two sets of fixed parameter values (Table 1). We examine how each particular ecological intervention applied to a single parameter (process) affects disease outcomes in recipient populations in terms of:  1) total number of cases in the recipient population, and 2) the total number of spillover events in a defined timeframe. 
+
+Interventions were implemented as a fixed proportional reduction in a parameter value, except donor culling and treatment are proportional increases in mortality rate ($\delta_d$) and recovery rate ($\gamma_d$ or $\gamma_r$), respectively. We assumed that each specified intervention only affected a single parameter, except vaccination of recipient, which affects both spillover transmission (donor to recipient) and transmission among recipient hosts.
+
+Each simulation was run for 5 years using monthly time steps with initial population sizes of 10,000 hosts in each of the donor and recipient populations. We initialized all simulations with 5 infectious donor hosts. All other hosts were susceptible at the start of the simulations. We allowed 5 new infectious donors to be introduced once per year thereafter (to allow persistence in the donor host). We used parameter values representing two different example spillover systems, which differed in their assumed contact rates. We ran 100 replicate simulations per ecological intervention condition. We presented the average outcomes (total cases in the recipient population and total number of spillover events) in Figures S2-S5. 
+
+Model specification and assumptions are below. Note the modeling framework is intentionally simplistic because our goal is to visualize potential non-linearities in effects of different ecological interventions. This type of framework could be adapted to address ecological complexities of particular systems (e.g., environmental transmission, spatial structure, etc.). Currently, the framework is intended to generate hypotheses for further examination.
+
+### _Assumptions_
+
+- Only spillover from donor to recipient, no spillback from recipient to donor
+- Homogenous mixing in each population and between them
+- Direct contact transmission only
+- Lifelong immunity
+- No disease-induced mortality
+- All newborns are susceptible
+- No spatial structure
+- No density-dependent processes
+
+### _Model structure_
+
+We first specify the ordinary differential equation (ODE) model, based on the classic SIR compartmental framework (e.g., Keeling and Rohani 2007). We then implement a stochastic, discrete time approximation to the ODE system using an Euler-multinomial approach. Disease dynamics in the donor host ($d$) are described by the following equations:
+
+$$
+\frac{dS_d}{dt} = \mu_d N_d - \delta_d S_d - \alpha_{d-d} \rho_{d-d} I_d S_d - \nu_d S_d\\
+\\
+\frac{dI_d}{dt} = \alpha_{d-d} \rho_{d-d} I_d S_d - (\delta_d + \gamma_d) I_d\\
+\\
+\frac{dR_d}{dt} =  \gamma_d I_d + \nu_d S_d - \delta_d R_d
+$$
+and in the recipient host ($r$):
+
+$$
+\frac{dS_r}{dt} = \mu_r N_r - \delta_r S_r - (\alpha_{r-r} \rho_{r-r} I_r + \alpha_{d-r} \rho_{d-r} I_d) S_r - \nu_r S_r\\
+\\
+\frac{dI_r}{dt} = (\alpha_{r-r} \rho_{r-r} I_r + \alpha_{d-r} \rho_{d-r} I_d) S_r - (\delta_r + \gamma_r) I_r\\
+\\
+\frac{dR_r}{dt} =  \gamma_r I_r + \nu_r S_r - \delta_r R_r
+$$
+
+where all parameters are defined as in Table S1. For simulations wtih vaccination ($\nu_d > 0$ or $\nu_r > 0$), the vaccination hazards (daily rates) are calculated from weekly vaccination probabilities $0 < p_i < 1$ as $\nu_i = -ln(1-p_i)/{\Delta t}$, where $\Delta t = 7$.
+
+For this system, we can derive reproduction ratios $R_0$ for sub-component models (assuming no vaccination, i.e., $\nu_d = \nu_r = 0$), namely:
+
+$$
+R_{0_{d-d}} = \frac{\alpha_{d-d} \rho_{d-d} S_{0_d}}{\delta_d + \gamma_d}\\
+\\
+R_{0_{d-r}} = \frac{\alpha_{d-r} \rho_{d-r} S_{0_r}}{\delta_d + \gamma_d}\\
+\\
+R_{0_{r-r}} = \frac{\alpha_{r-r} \rho_{r-r} S_{0_r}}{\delta_r + \gamma_r}
+$$
+
+#### _Parameter definitions_
+
+Table S1 shows all parameter definitions, including both model notation and variable names used in the code for model implementation. Baseline parameter values are given for two example pathogens. Example 1 represents a pathogen that has supercritical transmission in the recipient host ($R_{0_{r-r}} > 1$), like Ebola. Example 2 represents a pathogen that has subcritical transmission in the recipient host ($R_{0_{r-r}} < 1$), like Nipah virus. 
+
+`r knitr::kable(tab1)`
+
+#### _Interventions_
+
+Table S2 shows how interventions relate to the model parameters.
+
+`r knitr::kable(tab2)`
+
+### Model implementation
+
+The Euler-multinomial approximation was implemented in R version 3.1.5 and uses the `pomp` package (version 1.19).
+
+```{r initialize, echo=FALSE}
+# Define control parameters
+SEED <- 20190326
+REPS <- 100
+TIMESTEP <- 7
+YEARS <- 5
+
+# Define model parameters
+ex1 <- pars$Example1
+names(ex1) <- pars$Name
+ex2 <- pars$Example1
+names(ex2) <- pars$Name
+
+# Initialize
+set.seed(SEED)
+
+inits1 <- initSim(ex1)
+inits2 <- initSim(ex2)
+```
+
+```{r baseline, echo=FALSE}
+if(file.exists('simDat.Rdata')){
+  load(simDat.Rdata)
+}else{
+  sim1 <- replicate(REPS,runSim(inits1,ex1))
+  sim2 <- replicate(REPS,runSim(inits2,ex2))
+  save(sim1,sim2,file = 'simDat.Rdata')
+}
+```
+
+```{r baseline, echo=FALSE}
+
+```
