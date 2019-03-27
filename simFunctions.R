@@ -1,7 +1,7 @@
 # simFunctions.R
 
 # Deifine intial conditions
-initSim <- function(pars, initId = 5, type = 'DFE'){
+initSim <- function(pars, type = 'DFE', initId = 5){
   with(as.list(pars),{
     switch(type,
            DFE = {
@@ -12,11 +12,28 @@ initSim <- function(pars, initId = 5, type = 'DFE'){
                       S_r = pop0_r,
                       I_r = 0,
                       R_r = 0,
-                      cum_I_r = 0
+                      cum_I_r = 0,
+                      cum_I_sp = 0
+             )},
+           EE = {
+             beta_dd <- cont_dd * trans_dd
+             gamma_d <- 1/dur_d
+             S_eq <- (mort_d + gamma_d) / beta_dd
+             I_eq <- (birth_d * pop0_d / S_eq - mort_d) / beta_dd
+             R_eq <- gamma_d * I_eq / mort_d
+             tmp <- c(time = 0,
+                      S_d = S_eq,
+                      I_d = I_eq,
+                      R_d = R_eq,
+                      S_r = pop0_r,
+                      I_r = 0,
+                      R_r = 0,
+                      cum_I_r = 0,
+                      cum_I_sp = 0
              )},
            error('Initial conditions type not implemented.')
     )
-    return(tmp)
+    return(round(tmp))
   })
 }
 
@@ -49,7 +66,8 @@ simEulerstep <- function (x, params, dt){
       births_r-sum(S_r.removal), # change in S_r
       S_r.removal[2]+S_r.removal[3]-sum(I_r.removal), # change in I_r
       I_r.removal[2]-R_r.removal, # change in R_r
-      S_r.removal[2] # change in cum_I_r
+      S_r.removal[2]+S_r.removal[3], # change in cum_I_r (total infections in recipient)
+      S_r.removal[2] # change in cum_I_sp (total spillover infections)
     )
   })
 }
@@ -63,4 +81,52 @@ runSim <- function(init, pars, maxtime = round(YEARS*365.25), dt = TIMESTEP, bro
     pop <- pop + simEulerstep(pop,pars,dt)
   }
   return(data.frame(ts))
+}
+
+simPlot <- function(sim){
+  tmp <- as.data.frame(sim) %>% select(-c(cum_I_r,cum_I_sp)) %>% gather(subpop,individuals,-time)
+  plt <- (
+    tmp %>% 
+      ggplot(aes(x = time/7, y = individuals, col = subpop)) +
+      geom_line(size = 1.2) +
+      xlab("time (weeks)") +
+      ylab("individuals") +
+      coord_cartesian(clip = "off") +
+      theme_dviz_hgrid(font_family = 'Arial') +
+      theme(
+        axis.ticks.x = element_blank(),
+        axis.line = element_blank(),
+        plot.margin = margin(3, 7, 3, 1.5),
+        legend.title.align = 0.5,
+        legend.justification = c(0.5,0)
+      )
+  )
+  return(plt)
+}
+
+foiPlot <- function(sim, pars){
+  tmp <- as.data.frame(sim) %>% mutate(sFOI = pars[['cont_dd']]*pars[['trans_dd']]*I_d)
+  plt <- (
+    tmp %>% 
+      ggplot(aes(x = time/7, y = sFOI)) +
+      geom_line(size = 1.2) +
+      xlab("time (weeks)") +
+      ylab("spillover FOI") +
+      coord_cartesian(clip = "off") +
+      theme_dviz_hgrid(font_family = 'Arial') +
+      theme(
+        axis.ticks.x = element_blank(),
+        axis.line = element_blank(),
+        plot.margin = margin(3, 7, 3, 1.5)
+      )
+  )
+  return(plt)
+}
+
+output <- function(sim, pars){
+  cum_I_r <- max(sim$cum_I_r)
+  cum_I_sp <- max(sim$cum_I_sp)
+  mean_I_d <- mean(sim$I_d)
+  mean_sFOI <- pars[['cont_dd']]*pars[['trans_dd']]*mead_I_d
+  return(c(cum_I_r = cum_I_r, cum_I_sp = cum_I_sp, mean_sFOI = mean_sFOI, mean_I_d = mean_I_d))
 }
