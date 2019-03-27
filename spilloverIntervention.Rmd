@@ -45,8 +45,6 @@ ex2 <- pars$Example2
 names(ex2) <- pars$Name
 
 # Initialize
-set.seed(SEED)
-
 inits1 <- initSim(ex1,INITTYPE)
 inits2 <- initSim(ex2,INITTYPE)
 
@@ -101,6 +99,16 @@ R_{0_{d-r}} = \frac{\alpha_{d-r} \rho_{d-r} N_{0_r}}{\delta_d + \gamma_d}\\
 R_{0_{r-r}} = \frac{\alpha_{r-r} \rho_{r-r} N_{0_r}}{\delta_r + \gamma_r}
 $$
 
+The disease free equilibrium for the donor in the determinisitc model, which is used to set initial conditions for this population, is:
+
+$$
+S^* = (\delta_d + \gamma_d) / (\alpha_{d-d} \rho_{d-d})\\
+\\
+I^* = (\mu_d * N_{0_d} / S^* - \delta_d) / (\alpha_{d-d} \rho_{d-d})
+\\
+R^* = \gamma_d I^* / \delta_d
+$$
+
 #### _Parameter definitions_
 
 Table S1 shows all parameter definitions, including both model notation and variable names used in the code for model implementation. Baseline parameter values are given for two example pathogens. Example 1 represents a pathogen that has supercritical transmission in the recipient host ($R_{0_{r-r}} > 1$), like Ebola. Example 2 represents a pathogen that has subcritical transmission in the recipient host ($R_{0_{r-r}} < 1$), like Nipah virus. In both examples, the donor and recipient life expectancies are set at 15 and 60 years, respectively, and birth rates are set to balance mortality rates ($\nu_i = \delta_i$).
@@ -122,6 +130,7 @@ The Euler-multinomial approximation was implemented in R version 3.1.5 and uses 
 if(file.exists(fn)){
   load(fn)
 }else{
+  set.seed(SEED)
   sim1 <- replicate(REPS,runSim(inits1,ex1))
   sim2 <- replicate(REPS,runSim(inits2,ex2))
   save(sim1,sim2,file = fn)
@@ -129,7 +138,7 @@ if(file.exists(fn)){
 ```
 
 ```{r simplots, echo=FALSE}
-SIMID <- 10
+SIMID <- 8
 grid.arrange(simPlot(sim1[,SIMID]),foiPlot(sim1[,SIMID],ex1), nrow = 2)
 grid.arrange(simPlot(sim2[,SIMID]),foiPlot(sim2[,SIMID],ex2), nrow = 2)
 

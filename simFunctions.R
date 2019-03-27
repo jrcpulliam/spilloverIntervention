@@ -127,6 +127,6 @@ output <- function(sim, pars){
   cum_I_r <- max(sim$cum_I_r)
   cum_I_sp <- max(sim$cum_I_sp)
   mean_I_d <- mean(sim$I_d)
-  mean_sFOI <- pars[['cont_dd']]*pars[['trans_dd']]*mead_I_d
+  mean_sFOI <- pars[['cont_dd']]*pars[['trans_dd']]*mean_I_d
   return(c(cum_I_r = cum_I_r, cum_I_sp = cum_I_sp, mean_sFOI = mean_sFOI, mean_I_d = mean_I_d))
 }
