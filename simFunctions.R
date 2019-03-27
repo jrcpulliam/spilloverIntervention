@@ -3,7 +3,7 @@
 # Deifine intial conditions
 initSim <- function(pars, type = 'DFE', initId = 5){
   with(as.list(pars),{
-    switch(type,
+    switch(as.character(type),
            DFE = {
              tmp <- c(time = 0,
                       S_d = pop0_d-initId,
@@ -37,6 +37,45 @@ initSim <- function(pars, type = 'DFE', initId = 5){
   })
 }
 
+# Define parameter adjustments for interventions
+intvPars <- function(prop,pars,intv = 'none'){
+  switch(as.character(intv),
+         none = {},
+         fertCont_d = {
+           pars['birth_d'] <- pars['birth_d']*prop
+         },
+         cull_d = {
+           le <- (1/pars['mort_d'])*prop # decrease life expectancy
+           pars['mort_d'] <- 1/le
+         },
+         reduceContact_d = {
+           pars['cont_dd'] <- pars['cont_dd']*prop # Food distribution??
+         },
+         reduceContact_r = {
+           pars['cont_rr'] <- pars['cont_rr']*prop # Movement restriction??
+         },
+         biosecurity = {
+           pars['cont_dr'] <- pars['cont_dr']*prop
+         },
+         vax_d = {
+           pars['vax_d'] <- (1-prop) # instead of affecting infection probs...
+         },
+         vax_r = {
+           pars['vax_r'] <- (1-prop) # instead of affecting infection probs...
+         },
+         tx_d = {           
+           infDurTx <- pars['dur_d']*prop # decrease duration of infection [not increase???]
+           pars['dur_d'] <- infDurTx 
+         },
+         tx_r = {
+           infDurTx <- pars['dur_r']*prop # decrease duration of infection [not increase???]
+           pars['dur_r'] <- infDurTx 
+         },
+         error('Intervention unknown.'))
+  return(pars)
+}
+
+# Single step for Euler-multinomial implementation of model
 simEulerstep <- function (x, params, dt){
   with(c(as.list(x),params),{
     N_d <- S_d + I_d + R_d
@@ -44,9 +83,9 @@ simEulerstep <- function (x, params, dt){
     beta_dd <- cont_dd * trans_dd 
     beta_dr <- cont_dr * trans_dr 
     beta_rr <- cont_rr * trans_rr 
-    dFOI <- beta_dd * I_d
-    sFOI <- beta_dr * I_d
-    rFOI <- beta_rr * I_r
+    dFOI <- beta_dd * I_d # force of infection experienced by donor
+    sFOI <- beta_dr * I_d # force of infection experienced by recipient from donor
+    rFOI <- beta_rr * I_r # force of infection experienced by recipient from recipient 
     
     births_d <- rpois(n=1,lambda=birth_d*N_d*dt)
     births_r <- rpois(n=1,lambda=birth_r*N_r*dt)
@@ -117,16 +156,56 @@ foiPlot <- function(sim, pars){
       theme(
         axis.ticks.x = element_blank(),
         axis.line = element_blank(),
-        plot.margin = margin(3, 7, 3, 1.5)
+        plot.margin = margin(3, 7, 3, 1.5),
+        legend.title.align = 0.5,
+        legend.justification = c(0.5,0)
       )
   )
   return(plt)
 }
 
-output <- function(sim, pars){
+# Calculate results for comparsion from a set of simulations
+output <- function(sim){
   cum_I_r <- max(sim$cum_I_r)
   cum_I_sp <- max(sim$cum_I_sp)
-  mean_I_d <- mean(sim$I_d)
-  mean_sFOI <- pars[['cont_dd']]*pars[['trans_dd']]*mean_I_d
-  return(c(cum_I_r = cum_I_r, cum_I_sp = cum_I_sp, mean_sFOI = mean_sFOI, mean_I_d = mean_I_d))
+  return(c(cum_I_r = cum_I_r, cum_I_sp = cum_I_sp))
+}
+
+## Run nn replicates of an intervention scenario and give summary results
+simSummary <- function(proportionChange, interventionType, baseline, nn = REPS, browse = F){
+  switch(as.character(baseline),
+         ex1 = {
+           inits <- inits1
+           pars <- ex1
+         },
+         ex2 = {
+           inits <- inits2
+           pars <- ex2
+         },
+         error('Baseline scenario unknown.'))
+  if (browse) browser()
+  sims <- replicate(nn,runSim(inits,intvPars(proportionChange,pars,interventionType)))
+  out <- unname(t(sapply(1:nn,function(ii) output(sims[,ii]))) %>% apply(2,mean))
+  return(data.frame(prop = proportionChange, intv = interventionType, baseline = baseline, cum_I_r = out[1], cum_I_sp = out[2]))
+}
+
+resPlot <- function(scenario, results = res){
+  tmp <- results %>% filter(baseline == scenario) %>% mutate(intensity = as.character((1-prop)*100), intv = factor(intv, levels = tab2$Type, labels = tab2$Intervention))
+  plt <- (
+    tmp %>% 
+      ggplot(aes(x = intv, y = intensity, fill = cum_I_sp)) +
+      geom_tile(width = .95, height = 0.95) + 
+      scale_fill_viridis_c(option = "B", begin = 0.98, end = 0.15,
+                           name = "total spillover cases") +
+      scale_y_discrete(name = 'intervention intensity') +
+      scale_x_discrete(name = 'intervention type') +
+      coord_fixed(expand = FALSE) +
+      theme_dviz_open(font_family = 'Arial') +
+      theme(axis.line = element_blank(),
+            axis.ticks = element_blank(),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            legend.title = element_text(size = 12)
+      )
+  )
+  return(plt)
 }

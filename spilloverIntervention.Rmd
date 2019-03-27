@@ -17,9 +17,9 @@ library(gridExtra)
 source('simFunctions.R')
 pars <- read_csv('parameters.csv')
 # Format Table S1
-tab1 <- pars %>% select(Parameter, Description, Name, Units, Example1, Example2) %>% mutate(Example1 = as.character(ifelse(Example1 < 0.01,signif(Example1,2),round(Example1,2))), Example2 = as.character(ifelse(Example2 < 0.01,signif(Example2,2),round(Example2,2))))
+tab1 <- pars %>% select(Parameter, Description, Name, Units, Example1, Example2) %>% mutate(Example1 = as.character(ifelse(Example1 < 0.01,signif(Example1,2),round(Example1,2))), Example2 = as.character(ifelse(Example2 < 0.01,signif(Example2,2),round(Example2,2)))) %>% rename(`Example 1` = Example1, `Example 2` = Example2)
 # Format Table S2
-tab2 <- pars %>% filter(!is.na(Intervention)) %>% select(Intervention, Parameter, Description)
+tab2 <- pars %>% filter(!is.na(Intervention)) %>% select(Intervention, Type, Description)
 ```
 
 ## Modelling methods
@@ -44,16 +44,20 @@ names(ex1) <- pars$Name
 ex2 <- pars$Example2
 names(ex2) <- pars$Name
 
+propChange <- c(10^(-5:-2),0.5,seq(0.1,1,0.1))
+interventions <- tab2$Type
+
 # Initialize
 inits1 <- initSim(ex1,INITTYPE)
 inits2 <- initSim(ex2,INITTYPE)
 
 fn <- paste0('simDat_',INITTYPE,'.Rdata')
+fn2 <- paste0('simDatIntervention_',INITTYPE,'.Rdata')
 ```
 
 Each simulation was run for `r YEARS` years using weekly time steps with initial population sizes of `r ex1[['pop0_d']]` hosts in each of the donor and recipient populations. We initialized all simulations at the endemic equilibrium (with values rounded) for the donor and at the disease-free equilibrium for the recipeint. We used parameter values representing two different example spillover systems, which differed in their assumed contact rates and durations of infection. We ran `r REPS` replicate simulations per ecological intervention condition. We presented the average outcomes (total cases in the recipient population and total number of spillover events) in Figures S3-S6. 
 
-Model specification and assumptions are below. Note the modeling framework is intentionally simplistic because our goal is to visualize potential non-linearities in effects of different ecological interventions. This type of framework could be adapted to address ecological complexities of particular systems (e.g., environmental transmission, spatial structure, etc.). Currently, the framework is intended to generate hypotheses for further examination.
+Model specification and assumptions are described below. Note that the modeling framework is intentionally simplistic because our goal is to visualize potential non-linearities in effects of different ecological interventions. This type of framework could be adapted to address ecological complexities of particular systems (e.g., environmental transmission, spatial structure, etc.). Currently, the framework is intended to generate hypotheses for further examination.
 
 ### _Assumptions_
 
@@ -142,7 +146,32 @@ SIMID <- 8
 grid.arrange(simPlot(sim1[,SIMID]),foiPlot(sim1[,SIMID],ex1), nrow = 2)
 grid.arrange(simPlot(sim2[,SIMID]),foiPlot(sim2[,SIMID],ex2), nrow = 2)
 
-# t(sapply(1:REPS,function(ii) output(sim1[,ii],ex1))) %>% apply(2,mean)
-# t(sapply(1:REPS,function(ii) output(sim2[,ii],ex2))) %>% apply(2,mean)
-# tmp <- sapply(1:REPS,function(ii) sim2[,ii]$I_d[261])
+# ex1Summary <- unname(t(sapply(1:REPS,function(ii) output(sim1[,ii]))) %>% apply(2,mean))
+# res1 <- data.frame(prop = propChange, intv = 'none', baseline = 'ex1', cum_I_r = ex1Summary[1], cum_I_sp = ex1Summary[2])
+# 
+# ex2Summary <- unname(t(sapply(1:REPS,function(ii) output(sim2[,ii]))) %>% apply(2,mean))
+# res2 <- data.frame(prop = propChange, intv = 'none', baseline = 'ex2', cum_I_r = ex2Summary[1], cum_I_sp = ex2Summary[2])
+
+# sapply(1:REPS,function(ii) sim2[,ii]$I_d[261])
+```
+
+# Results
+
+```{r interventions, echo=FALSE}
+if(file.exists(fn2)){
+  load(fn2)
+}else{
+  set.seed(SEED)
+  tmp <- expand.grid(prop = propChange, intv = interventions, baseline = c('ex1','ex2'))
+  tmp$intv <- as.character(tmp$intv)
+  tmp$baseline <- as.character(tmp$baseline)
+  res <- NULL
+  for(ii in 1:nrow(tmp)){
+    res <- rbind(res,simSummary(tmp$prop[ii],tmp$intv[ii],tmp$baseline[ii],nn=REPS))
+  }
+  save(res,file = fn2)
+}
+
+resPlot('ex1')
+resPlot('ex2')
 ```
