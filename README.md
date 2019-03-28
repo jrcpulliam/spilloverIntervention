@@ -17,7 +17,7 @@
 - Switch from density-dependent to frequency-dependent transmission; difference should be minor but may reduce variation between runs because population size (which varies stochastically) currently affects reproduction number.
 - Need to decide how to implement vaccination. The original version reduces both of the transmission probabilities to recipient, but this is not consistent with how it's represented in the equations and is mechanistically odd. Text currently states that vaccination rates are calculated from weekly probabilities (this is not actually implemented; both this and the current implementation are different from the original version). My preference would be to switch the model formulation so that vaccination is strictly a proportion and is applied at birth; this will allow the intervention scaling to be more natural and is straight-forward to implement.
 - Would be cleaner to specify R0 values and calculated the contact rates from these and other parameters; currently this is done in defining the parameter table so is not explicit and doesn't allow tweaking R0 directly in the code, only via contact rate.
-- Should effect on birth rate be calculated via decrease in 1/rate so that this is more comparable to how culling is implemented?
+- Should effect on birth rate be calculated via increase in 1/rate so that this is more comparable to how culling is implemented?
 
 #### To do
 
