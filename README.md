@@ -10,10 +10,7 @@
     - This was previously the case in the code but not indicated in the equations
 - Initialize simulations at EE for donor population and DFE for recipient population
 - Reducing the d-d contact was previously referred to as "food distribution - donor" and r-r contact rate as "movement restriction - recipient"; I've reframed these as "behavior manipulation of donor" and "behavior modification or recipient"; we can add some examples in the SI text to clarify (e.g. "via food distribution" for the former and "via social distancing or movement restrictions" for the latter)
-
-#### Suggested additional changes
-
-- Both vaccination and culling should be set as annual probabilities/fractions and converted to daily hazards
+- Both vaccination and culling are set as annual probabilities/fractions and converted to daily hazards
 
 #### Interesting things to examine further
 
@@ -33,3 +30,5 @@
 - Deal with seed change issue
 - Reorder (and relabel?) legend; fix placement / scaling issue
 - Add model diagram
+- Address specific feedback from Guilio
+- Somewhere define intensity
