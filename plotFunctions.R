@@ -24,7 +24,7 @@ simPlot <- function(sim){
 
 # Plot the spillover FOI over time for a single simulation run
 foiPlot <- function(sim, pars){
-  tmp <- as.data.frame(sim) %>% mutate(sFOI = pars[['cont_dd']]*pars[['trans_dd']]*I_d)
+  tmp <- as.data.frame(sim) %>% mutate(sFOI = pars[['beta_dd']]*I_d)
   plt <- (
     tmp %>% 
       ggplot(aes(x = time/7, y = sFOI)) +

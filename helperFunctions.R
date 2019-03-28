@@ -16,7 +16,6 @@ initSim <- function(pars, type = 'DFE', initId = 5){
                       cum_I_sp = 0
              )},
            EE = {
-             beta_dd <- cont_dd * trans_dd
              gamma_d <- 1/dur_d
              S_eq <- (mort_d + gamma_d) / beta_dd
              I_eq <- (birth_d * pop0_d / S_eq - mort_d) / beta_dd
@@ -37,42 +36,14 @@ initSim <- function(pars, type = 'DFE', initId = 5){
   })
 }
 
-# Define parameter adjustments for interventions
-intvPars <- function(prop,pars,intv = 'none'){
-  switch(as.character(intv),
-         none = {},
-         fertCont_d = {
-           pars['birth_d'] <- pars['birth_d']*prop # decrease birth rate
-         },
-         cull_d = {
-           le <- (1/pars['mort_d'])*prop # decrease life expectancy
-           pars['mort_d'] <- 1/le
-         },
-         reduceContact_d = {
-           pars['cont_dd'] <- pars['cont_dd']*prop # Behavior manipulation of donor
-         },
-         reduceContact_r = {
-           pars['cont_rr'] <- pars['cont_rr']*prop # behavior modification of recipient
-         },
-         biosecurity = {
-           pars['cont_dr'] <- pars['cont_dr']*prop # biosecurity measures at the interface
-         },
-         vax_d = {
-           pars['vax_d'] <- (1-prop) # instead of affecting infection probs...
-         },
-         vax_r = {
-           pars['vax_r'] <- (1-prop) # instead of affecting infection probs...
-         },
-         tx_d = {           
-           infDurTx <- pars['dur_d']*prop # decrease duration of infection
-           pars['dur_d'] <- infDurTx 
-         },
-         tx_r = {
-           infDurTx <- pars['dur_r']*prop # decrease duration of infection
-           pars['dur_r'] <- infDurTx 
-         },
-         error('Intervention unknown.'))
-  return(pars)
+# Convert (annual) probability to daily hazard rate
+toRate <- function(pp,dt = 365.25){
+  -log(1-pp)/dt
+}
+
+# Calculate transmission coefficients from R0 and other paramters
+betaCalc <- function(R0,N0,delta,gamma){
+  R0 * (delta + gamma) / N0
 }
 
 # Calculate results for comparsion from a set of simulations

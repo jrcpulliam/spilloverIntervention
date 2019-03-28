@@ -23,15 +23,9 @@
 
 #### To do
 
-- Revert duration of infection in donor for Example 2 from 21 to 12
-- Simplify transmission coefficient to beta
-- Specify R0 values and calculated the contact rates from these and other parameters
-- Add reintroduction process to model (rate comparable to 5 introductions per year for both examples); add some text explaining this
+- Add some text explaining the reintroduction process and its justification
 - Add text clarifying contact terms
-- Change the way that vaccination and culling scale with "intensity"
-- Move parameter adjustments from helperFunctions to the main file
 - Clarify scalings in ODE or table
-- Fully specify initial conditions under "Model structure"
 - Figure and table captions
 - Figures for main text
 - Add references and all package specifications
