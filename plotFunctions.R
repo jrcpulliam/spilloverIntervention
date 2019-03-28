@@ -58,7 +58,6 @@ resPlot_sp <- function(scenario, results = res){
       scale_y_discrete(name = 'intervention intensity') +
       scale_x_discrete(name = 'intervention type') +
       coord_fixed(expand = FALSE) +
-      theme_dviz_open(font_family = 'Arial') +
       theme(axis.line = element_blank(),
             axis.ticks = element_blank(),
             axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
@@ -83,7 +82,6 @@ resPlot_all <- function(scenario, results = res){
       scale_y_discrete(name = 'intervention intensity') +
       scale_x_discrete(name = 'intervention type') +
       coord_fixed(expand = FALSE) +
-      theme_dviz_open(font_family = 'Arial') +
       theme(axis.line = element_blank(),
             axis.ticks = element_blank(),
             axis.text.x = element_text(angle = 45, hjust = 1, size = 10),

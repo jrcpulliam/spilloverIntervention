@@ -42,20 +42,20 @@ intvPars <- function(prop,pars,intv = 'none'){
   switch(as.character(intv),
          none = {},
          fertCont_d = {
-           pars['birth_d'] <- pars['birth_d']*prop
+           pars['birth_d'] <- pars['birth_d']*prop # decrease birth rate
          },
          cull_d = {
            le <- (1/pars['mort_d'])*prop # decrease life expectancy
            pars['mort_d'] <- 1/le
          },
          reduceContact_d = {
-           pars['cont_dd'] <- pars['cont_dd']*prop # Food distribution??
+           pars['cont_dd'] <- pars['cont_dd']*prop # Behavior manipulation of donor
          },
          reduceContact_r = {
-           pars['cont_rr'] <- pars['cont_rr']*prop # Movement restriction??
+           pars['cont_rr'] <- pars['cont_rr']*prop # behavior modification of recipient
          },
          biosecurity = {
-           pars['cont_dr'] <- pars['cont_dr']*prop
+           pars['cont_dr'] <- pars['cont_dr']*prop # biosecurity measures at the interface
          },
          vax_d = {
            pars['vax_d'] <- (1-prop) # instead of affecting infection probs...
@@ -64,11 +64,11 @@ intvPars <- function(prop,pars,intv = 'none'){
            pars['vax_r'] <- (1-prop) # instead of affecting infection probs...
          },
          tx_d = {           
-           infDurTx <- pars['dur_d']*prop # decrease duration of infection [not increase???]
+           infDurTx <- pars['dur_d']*prop # decrease duration of infection
            pars['dur_d'] <- infDurTx 
          },
          tx_r = {
-           infDurTx <- pars['dur_r']*prop # decrease duration of infection [not increase???]
+           infDurTx <- pars['dur_r']*prop # decrease duration of infection
            pars['dur_r'] <- infDurTx 
          },
          error('Intervention unknown.'))
