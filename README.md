@@ -28,3 +28,4 @@
 - Add references and all package specifications
 - Adjust aspect ratios of figures?
 - Deal with seed change issue
+- Reorder (and relabel?) legend; fix placement / scaling issue
