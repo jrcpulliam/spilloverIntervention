@@ -47,7 +47,7 @@ Interventions were implemented as a fixed proportional reduction in a parameter 
 # Define control parameters
 SEED <- 20190326
 REPS <- 100
-TIMESTEP <- 7
+TIMESTEP <- 1
 YEARS <- 5
 INITTYPE <- 'EE'
 SIMID <- 8
