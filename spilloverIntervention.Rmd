@@ -46,7 +46,7 @@ Interventions were implemented as a fixed proportional reduction in a parameter 
 ```{r initialize, echo=FALSE}
 # Define control parameters
 SEED <- 20190326
-REPS <- 100
+REPS <- 1000
 TIMESTEP <- 1
 YEARS <- 5
 INITTYPE <- 'EE'
@@ -245,8 +245,8 @@ if(file.exists(fn)){
   load(fn)
 }else{
   set.seed(SEED)
-  sim1 <- replicate(REPS,runSim(inits1,ex1))
-  sim2 <- replicate(REPS,runSim(inits2,ex2))
+  sim1 <- replicate(SIMID,runSim(inits1,ex1))
+  sim2 <- replicate(SIMID,runSim(inits2,ex2))
   save(sim1,sim2,file = fn)
 }
 ```
