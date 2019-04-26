@@ -20,7 +20,6 @@
 
 #### To do
 
-- Add some text explaining the reintroduction process and its justification
 - Add text clarifying contact terms
 - Clarify scalings in ODE or table
 - Figure and table captions
@@ -29,6 +28,5 @@
 - Adjust aspect ratios of figures?
 - Deal with seed change issue
 - Reorder (and relabel?) legend; fix placement / scaling issue
-- Add model diagram
-- Address specific feedback from Guilio
+- Address specific feedback from Guilio and Sanna
 - Somewhere define intensity
