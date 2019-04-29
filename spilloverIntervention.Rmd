@@ -23,7 +23,7 @@ library(pomp)
 library(readr)
 library(tidyverse)
 library(gridExtra)
-# this package is not on CRAN; if you don't have it, you can comment out lines 13 and 35 in plotFunctions.R
+# this package (dviz.supp) is not on CRAN; if you don't have it, you can comment out lines 13 and 35 in plotFunctions.R
 library(dviz.supp) # required to call theme_dviz_hgrid()
 # load external functions and parameter values
 source('helperFunctions.R')
@@ -110,7 +110,7 @@ $$
 \frac{dR_r}{dt} =  \gamma_r I_r + \nu_r S_r - \delta_r R_r
 $$
 
-where all parameters are defined as in Table S1. For simulations wtih vaccination ($\nu_d > 0$ or $\nu_r > 0$), the vaccination hazards (daily rates) are calculated from annual vaccination probabilities $0 < p_i < 1$ as $\nu_i = -ln(1-p_i)/{\Delta t}$, where $\Delta t = 365.25$. For simulations wtih culling ($\alpha_d > 0$), the excess mortality hazard (daily rate) is similarly calculated from the annual fraction culled.
+where all parameters are defined as in Table S1. For simulations wtih vaccination ($\nu_d > 0$ or $\nu_r > 0$), the vaccination hazards (daily rates) are calculated from average fraction of hosts in the population vaccinated every year $0 < p_i < 1$ as $\nu_i = -ln(1-p_i)/{\Delta t}$, where $\Delta t = 365.25$. For simulations wtih culling ($\alpha_d > 0$), the excess mortality hazard (daily rate) is similarly calculated from the annual fraction culled.
 
 For this system, we can derive reproduction ratios $R_0$ for sub-component models (assuming no vaccination, i.e., $\nu_d = \nu_r = 0$), namely:
 
@@ -138,7 +138,7 @@ These values are rounded to the nearest integer for initiation of the Euler-mult
 
 #### _Parameter definitions_
 
-Table S1 shows all parameter definitions, including both model notation and variable names used in the code for model implementation. Baseline parameter values are given for two example pathogens. Example 1 represents a pathogen that has supercritical transmission in the recipient host ($R_{0_{r-r}} > 1$), like Ebola. Example 2 represents a pathogen that has subcritical transmission in the recipient host ($R_{0_{r-r}} < 1$), like Nipah virus. In both examples, the donor and recipient life expectancies are set at 15 and 60 years, respectively, and birth rates are set to balance mortality rates ($\nu_i = \delta_i$).
+Table S1 shows all parameter definitions, including both model notation and variable names used in the code for model implementation. Baseline parameter values are given for two example pathogens. Example 1 represents a pathogen that has supercritical transmission in the recipient host ($R_{0_{r-r}} > 1$), like Ebola. Example 2 represents a pathogen that has subcritical transmission in the recipient host ($R_{0_{r-r}} < 1$), like Nipah virus. In both examples, the donor and recipient life expectancies are set at 15 and 60 years, respectively, and birth rates are set to balance mortality rates ($\mu_i = \delta_i$).
 
 `r knitr::kable(tab1)`
 
@@ -260,13 +260,13 @@ if(file.exists(fn)){
 
 _Example 1_:
 
-```{r simplot1, echo=FALSE}
+```{r simplot1, echo=FALSE, message=FALSE}
 grid.arrange(simPlot(sim1[,SIMID]),foiPlot(sim1[,SIMID],ex1), nrow = 2)
 ```
 
 _Example 2_:
 
-```{r simplot2, echo=FALSE}
+```{r simplot2, echo=FALSE, message=FALSE}
 grid.arrange(simPlot(sim2[,SIMID]),foiPlot(sim2[,SIMID],ex2), nrow = 2)
 
 # sapply(1:REPS,function(ii) sim2[,ii]$I_d[261])

@@ -5,12 +5,14 @@ simPlot <- function(sim){
   tmp <- as.data.frame(sim) %>% select(-c(cum_I_r,cum_I_sp)) %>% gather(subpop,individuals,-time)
   plt <- (
     tmp %>% 
-      ggplot(aes(x = time/7, y = individuals, col = subpop)) +
+      ggplot(aes(x = time/365.25, y = individuals, col = subpop)) +
       geom_line(size = 1.2) +
-      xlab("time (weeks)") +
-      ylab("individuals") +
+      xlab("time (years)") +
+      ylab("sqrt individuals") +
       coord_cartesian(clip = "off") +
       theme_dviz_hgrid(font_family = 'Arial') +
+      scale_color_brewer(type = "qual", palette = "Paired", labels = c(expression(I[d]),expression(I[r]),expression(R[d]),expression(R[r]),expression(S[d]),expression(S[r]))) +
+      coord_trans(y="sqrt") +
       theme(
         axis.ticks.x = element_blank(),
         axis.line = element_blank(),
@@ -27,9 +29,9 @@ foiPlot <- function(sim, pars){
   tmp <- as.data.frame(sim) %>% mutate(sFOI = pars[['beta_dd']]*I_d)
   plt <- (
     tmp %>% 
-      ggplot(aes(x = time/7, y = sFOI)) +
+      ggplot(aes(x = time/365.25, y = sFOI)) +
       geom_line(size = 1.2) +
-      xlab("time (weeks)") +
+      xlab("time (years)") +
       ylab("spillover FOI") +
       coord_cartesian(clip = "off") +
       theme_dviz_hgrid(font_family = 'Arial') +
