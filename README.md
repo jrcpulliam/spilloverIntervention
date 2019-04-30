@@ -21,14 +21,7 @@
 #### To do
 
 - Add text clarifying contact terms
-- Add derived values to Table 1
 - Clarify scalings in ODE or table
-- Figure and table captions
-- Figures for main text
-- Add references and all package specifications
-- Adjust aspect ratios of figures?
 - Deal with seed change issue
-- Reorder legend; fix placement / scaling issue
-- Address specific feedback from Guilio and Sanna
-- Somewhere define intensity
+- Address specific feedback from Sanna
 - Finalize README

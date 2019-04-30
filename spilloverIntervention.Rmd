@@ -1,9 +1,7 @@
 ---
-title: Ecological interventions to prevent and manage pathogen spillover - Supplemental
-  Information
-author: Sokolow, SH, N Nova, K Pepin, AJ Peel, K Manlove, PC Cross, DJ Becker, RK
-  Plowright, JRC Pulliam, H McCallum, and GA De Leo
-date: "March 25, 2019"
+title: Ecological interventions to prevent and manage pathogen spillover - Supplemental Information
+author: Sokolow, SH, N Nova, K Pepin, AJ Peel, K Manlove, PC Cross, DJ Becker, RK Plowright, JRC Pulliam, H McCallum, and GA De Leo
+date: "April 30, 2019"
 output:
   html_document: default
   pdf_document:
@@ -19,19 +17,18 @@ fontsize: 12pt
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 # install these packages from CRAN if you do no have them
-library(pomp)
-library(readr)
-library(tidyverse)
-library(gridExtra)
-# this package (dviz.supp) is not on CRAN; if you don't have it, you can comment out lines 13 and 35 in plotFunctions.R
-library(dviz.supp) # required to call theme_dviz_hgrid()
+library(pomp) # versoin 1.19
+library(readr) # version 1.3.0
+library(tidyverse) # version 1.2.1
+# this package (dviz.supp) is not on CRAN; if you don't have it, you can comment out lines 13 and 37 in plotFunctions.R
+library(dviz.supp) # version 0.1.0; required to call theme_dviz_hgrid()
 # load external functions and parameter values
 source('helperFunctions.R')
 source('plotFunctions.R')
 pars <- read_csv('parameters.csv')
-# Format Table S1
-tab1 <- pars %>% select(Parameter, Description, Name, Units, Example1, Example2) %>% mutate(Example1 = as.character(ifelse(Example1 < 0.01,signif(Example1,2),round(Example1,2))), Example2 = as.character(ifelse(Example2 < 0.01,signif(Example2,2),round(Example2,2)))) %>% mutate(Example1 = ifelse(is.na(Example1),'(derived)',Example1), Example2 = ifelse(is.na(Example2),'(derived)',Example2)) %>% rename(`Example 1` = Example1, `Example 2` = Example2)
-# Format Table S2
+# Table S1 info
+tab1 <- pars %>% select(Parameter, Description, Name, Units, Example1, Example2)
+# Table S2 info
 tab2 <- pars %>% filter(!is.na(Intervention)) %>% select(Intervention, Type, Description)
 ```
 
@@ -65,6 +62,9 @@ ex1['beta_rr'] <- with(as.list(ex1),betaCalc(R0_rr,pop0_r,mort_r,1/dur_r))
 ex2['beta_dd'] <- with(as.list(ex2),betaCalc(R0_dd,pop0_d,mort_d,1/dur_d))
 ex2['beta_dr'] <- with(as.list(ex2),betaCalc(R0_dr,pop0_r,mort_d,1/dur_d))
 ex2['beta_rr'] <- with(as.list(ex2),betaCalc(R0_rr,pop0_r,mort_r,1/dur_r))
+
+# Format Table 1
+tab1 <- tab1 %>% mutate(Example1 = as.character(ifelse(ex1 < 0.01,signif(ex1,2),round(ex1,2))), Example2 = as.character(ifelse(ex2 < 0.01,signif(ex2,2),round(ex2,2)))) %>% rename(`Example 1` = Example1, `Example 2` = Example2)
 
 propChange <- c(10^(-5:-2),0.5,seq(0.1,1,0.1))
 interventions <- tab2$Type
@@ -134,7 +134,7 @@ R_{0_r} = 0
 $$
 These values are rounded to the nearest integer for initiation of the Euler-multinomial approximation.
 
-![Figure S1](./modelDiagram.png "Figure S1: Model diagram")
+![**Figure S1:** Structure of the two-host compartmental model used to explore the effects of ecological interventions. Solid arrows show rates of flow into and out of model compartments. Dashed arrows indicate influences that affect these rates.](./modelDiagram.png "Figure S1: Model diagram")
 
 #### _Parameter definitions_
 
@@ -144,13 +144,13 @@ Table S1 shows all parameter definitions, including both model notation and vari
 
 #### _Interventions_
 
-Table S2 shows how interventions relate to the model parameters. The `Type` column indicates how the intervention is referred to in the code.
+Table S2 shows how interventions relate to the model parameters. The `Type` column indicates how the intervention is referred to in the code. Intervention intensity is defined as a proportional scaling of the associated parameter, except for culling and vaccination (which have default values of zero). For culling and vaccination, the intensity is the average annual percentage of the relevant population that is culled or vaccinated. 
 
 `r knitr::kable(tab2)`
 
 ### Model implementation
 
-All code, simulation output, and other materials necessary to reproduce this file and results presented in the main text are provided at <https://github.com/jrcpulliam/spilloverIntervention>. The Euler-multinomial approximation was implemented in R version 3.1.5 and uses the `pomp` package (version 1.19). A single update is accomplished using the following function:
+All code, simulation output, and other materials necessary to reproduce this file and results presented in the main text are provided at <https://github.com/jrcpulliam/spilloverIntervention>. The Euler-multinomial approximation was implemented in R version 3.5.1 and uses the `pomp` package (version 1.19) [4,5]. A single update is accomplished using the following function:
 
 ```{r simEulerstep, echo=TRUE}
 # Single step for Euler-multinomial implementation of model
@@ -260,16 +260,14 @@ if(file.exists(fn)){
 
 _Example 1_:
 
-```{r simplot1, echo=FALSE, message=FALSE}
-grid.arrange(simPlot(sim1[,SIMID]),foiPlot(sim1[,SIMID],ex1), nrow = 2)
+```{r simplot1, echo=FALSE, message=FALSE, fig.cap = "**Figure S2:** One random realization of dynamics for example system 1 ($R_{0_{r-r}} > 1$), with no interventions.", fig.align="center"}
+plot_grid(simPlot(sim1[,SIMID]),foiPlot(sim1[,SIMID],ex1), nrow = 2, axis = 'r',align='v', labels = 'AUTO', label_fontfamily = 'Arial')
 ```
 
 _Example 2_:
 
-```{r simplot2, echo=FALSE, message=FALSE}
-grid.arrange(simPlot(sim2[,SIMID]),foiPlot(sim2[,SIMID],ex2), nrow = 2)
-
-# sapply(1:REPS,function(ii) sim2[,ii]$I_d[261])
+```{r simplot2, echo=FALSE, message=FALSE, fig.cap = "**Figure S3:** One random realization of dynamics for example system 2 ($R_{0_{r-r}} < 1$), with no interventions.", fig.align="center"}
+plot_grid(simPlot(sim2[,SIMID]),foiPlot(sim2[,SIMID],ex2), nrow = 2, axis = 'r',align='v', labels = 'AUTO', label_fontfamily = 'Arial')
 ```
 
 #### _Impact of interventions_
@@ -288,19 +286,31 @@ if(file.exists(fn2)){
   }
   save(res,file = fn2)
 }
-
 ```
 
 _Example 1_:
 
-```{r ex1, echo=FALSE}
+```{r ex1all, echo=FALSE, fig.cap = "**Figure S4:** Total cases in the recipient population, as a function of the intensity (y-axis) of different ecological interventions (x-axis), for example system 1 ($R_{0_{r-r}} > 1$). See Table S1 for parameter values used in this example.", fig.align="center"}
 resPlot_all('ex1')
+```
+```{r ex1sp, echo=FALSE, fig.cap = "**Figure S5:** Number of spillover events (cases in the recipient population caused by donor-to-recipient transmission), as a function of the intensity (y-axis) of different ecological interventions (x-axis), for example system 1 ($R_{0_{r-r}} > 1$). Note that interventions that decrease recipient-to-recipient transmission without decreasing recipient susceptibility (i.e., behavior modification of the recipient, treatment of the recipient) can actually increase spillover relative to no management. This counterintuitive outcome occurs because these interventions reduce transmission within the recipient host, leaving more individuals susceptible to spillover. Thus, although there are more spillovers, there are fewer total cases in the recipient (Figure S4).", fig.align="center"}
 resPlot_sp('ex1')
 ```
 
 _Example 2_:
 
-```{r ex2, echo=FALSE}
+```{r ex2all, echo=FALSE, fig.cap = "**Figure S6:** Total cases in the recipient population, as a function of the intensity (y-axis) of different ecological interventions (x-axis), for example system 2 ($R_{0_{r-r}} < 1$). See Table S1 for parameter values used in this example.", fig.align="center"}
 resPlot_all('ex2')
+```
+
+```{r ex2sp, echo=FALSE, fig.cap = "**Figure S7:** Number of spillover events (cases in the recipient population caused by donor-to-recipient transmission), as a function of the intensity (y-axis) of different ecological interventions (x-axis), for example system 2 ($R_{0_{r-r}} < 1$).", fig.align="center"}
 resPlot_sp('ex2')
 ```
+
+## References
+
+[1] Abbey, H. (1952) An examination of the Reed-Frost theory of epidemics. Hum Biol 24, 201-233  
+[2] Fenton, A. and Pedersen, A.B. (2005) Community epidemiology framework for classifying disease threats. Emerg Infect Dis 11, 1815-1821  
+[3] Viana, M., et al. (2014) Assembling evidence for identifying reservoirs of infection. Trends Ecol Evol 29, 270-279  
+[4] R Core Team (2018). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria. URL https://www.R-project.org/.  
+[5] King, A.A., et al. (2018) pomp: Statistical Inference for Partially Observed Markov Processes (R package, version 1.19). https://CRAN.R-project.org/package=pomp  
