@@ -30,6 +30,8 @@ Control parameters are set on lines 45-50 of the Rmd file and can be adjusted by
 - `INITTYPE` - type of initialization (default: 'EE'); can also be set to 'DFE' to initiate the runs at the disease free equilibrium in the reservoir population
 - `SIMID` - simulation ID to use for plotting (default: 8); can take on any integer value from 1 to REPS
 
+Model parameters are read in from the [**parameters.csv**](./parameters.csv) file and should be modified by editing that file.
+
 ## License
 
 See [this file](./LICENSE.md) for license information.
