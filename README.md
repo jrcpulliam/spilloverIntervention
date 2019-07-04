@@ -10,7 +10,7 @@ This code was written using R version 3.5.1 (2018-07-02)" ("Feather Spray"). The
 
 ## Guide to running the code
 
-We suggest you open the [R project file](./spilloverIntervetion.Rproj) in [R Sudio](http://rstudio.com/). The main file, which produces the supplemental information document, is [**spillverIntervention.Rmd**](./spillverIntervention.Rmd). Please view the file to see the package dependencies, which will need to be installed before you can run the analysis. Once you have installed the necessary packages, knitting this file to HTML will re-produce the supplemental information document. This file refers to the following other files, which you may want to explore further:
+We suggest you open the [R project file](./spilloverIntervetion.Rproj) in [R Sudio](http://rstudio.com/). The main file, which produces the supplemental information document, is [**spilloverIntervention.Rmd**](./spilloverIntervention.Rmd). Please view the file to see the package dependencies, which will need to be installed before you can run the analysis. Once you have installed the necessary packages, knitting this file to HTML will re-produce the supplemental information document. This file refers to the following other files, which you may want to explore further:
 
 - [**helperFunctions.R**](./helperFunctions.R) - contains functions for the simulation that are not shown in the document
 - [**plotFunctions.R**](./plotFunctions.R) - contains functions used for producing figures
