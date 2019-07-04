@@ -4,6 +4,10 @@ This repository contains the code to reproduce the supplement for:
 
 > Sokolow, SH, N Nova, K Pepin, AJ Peel, K Manlove, PC Cross, DJ Becker, RK Plowright, JRC Pulliam, H McCallum, and GA De Leo. (2019) Ecological interventions to prevent and manage pathogen spillover. _Phil Trans Roy Soc B_ doi:10.1098/rstb.2018.0342.
 
+## Software
+
+This code was written using R version 3.5.1 (2018-07-02)" ("Feather Spray"). The supplement was produced in R Studio version 1.1.456.
+
 ## Guide to running the code
 
 We suggest you open the [R project file](./spilloverIntervetion.Rproj) in [R Sudio](http://rstudio.com/). The main file, which produces the supplemental information document, is [**spillverInterventions.Rmd**](./spillverInterventions.Rmd). Please view the file to see the package dependencies, which will need to be installed before you can run the analysis. Once you have installed the necessary packages, knitting this file to HTML will re-produce the supplemental information document. This file refers to the following other files, which you may want to explore further:
